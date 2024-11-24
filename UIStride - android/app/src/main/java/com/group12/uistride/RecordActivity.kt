@@ -1,6 +1,8 @@
 package com.group12.uistride
 
 import android.Manifest
+import android.content.ContentValues
+import android.content.Context
 import android.content.Intent
 import android.content.IntentSender
 import android.content.pm.PackageManager
@@ -24,7 +26,21 @@ import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
 import android.os.Build
+import android.os.Handler
+import android.os.Looper
+import android.util.Log
 import android.widget.Toast
+import com.group12.uistride.model.Activity
+import com.group12.uistride.model.BaseResponse
+import com.group12.uistride.request.BaseApiService
+import com.group12.uistride.request.UtilsApi
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
+
 
 class RecordActivity : AppCompatActivity(), SensorEventListener{
     private lateinit var mapView: MapView
@@ -35,6 +51,7 @@ class RecordActivity : AppCompatActivity(), SensorEventListener{
     private var lastLocation: Location? = null
     private lateinit var distanceTextView: TextView
     private lateinit var stepsTextView: TextView
+    private lateinit var timerTextView: TextView
     private lateinit var sensorManager: SensorManager
     private var stepCounterSensor: Sensor? = null
     private var totalSteps = 0
@@ -43,6 +60,13 @@ class RecordActivity : AppCompatActivity(), SensorEventListener{
     private val REQUEST_CHECK_SETTINGS = 102
     private val REQUEST_ACTIVITY_RECOGNITION = 103
 
+    private var startTrackingTime: Long = 0
+    private lateinit var timerHandler: Handler
+    private lateinit var timerRunnable: Runnable
+
+    private lateinit var mApiService: BaseApiService
+    private lateinit var mContext: Context
+
     // Inisialisasi Polyline
     private lateinit var pathOverlay: Polyline
     private var currentMarker: Marker? = null // Menyimpan referensi marker saat ini
@@ -50,6 +74,10 @@ class RecordActivity : AppCompatActivity(), SensorEventListener{
     private var isTracking = false // Variabel untuk memantau apakah tracking aktif
     private var isMapCentered = false
 
+    private fun getAccountIdFromPreferences(): Long {
+        val sharedPreferences = getSharedPreferences("UserSession", MODE_PRIVATE)
+        return sharedPreferences.getLong("accountId", -1)
+    }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -58,6 +86,23 @@ class RecordActivity : AppCompatActivity(), SensorEventListener{
         Configuration.getInstance().load(applicationContext, sharedPreferences)
 
         setContentView(R.layout.activity_record)
+
+        mApiService = UtilsApi.getApiService()
+        mContext = this
+
+        val accountId = getAccountIdFromPreferences()
+        Log.d(ContentValues.TAG, "Fetched accountId from preferences: $accountId") // Log nilai ID akun
+
+        if (accountId == -1L) {
+            Log.w(ContentValues.TAG, "No accountId found, redirecting to LoginActivity") // Log jika user belum login
+            Toast.makeText(this, "User not logged in. Please login first.", Toast.LENGTH_SHORT).show()
+            val intent = Intent(this, LoginActivity::class.java)
+            startActivity(intent)
+            finish()
+        } else {
+            Log.d(ContentValues.TAG, "User logged in as accountId: $accountId") // Log jika user login berhasil
+            Toast.makeText(this, "Logged in as User ID: $accountId", Toast.LENGTH_SHORT).show()
+        }
 
         // Setup mapView
         mapView = findViewById(R.id.mapView)
@@ -68,6 +113,7 @@ class RecordActivity : AppCompatActivity(), SensorEventListener{
         // Inisialisasi TextView untuk menampilkan jarak
         distanceTextView = findViewById(R.id.distanceTextView)
         stepsTextView = findViewById(R.id.stepsTextView)
+        timerTextView = findViewById(R.id.timerTextView)
 
         // Inisialisasi Polyline untuk menggambar rute
         pathOverlay = Polyline()
@@ -135,6 +181,7 @@ class RecordActivity : AppCompatActivity(), SensorEventListener{
 
     private fun startTracking() {
         isTracking = true
+        startTrackingTime = System.currentTimeMillis() // Catat waktu mulai tracking
         totalDistance = 0.0
         distanceTextView.text = "Distance: 0.00 km"
         pathOverlay.points.clear()
@@ -144,16 +191,105 @@ class RecordActivity : AppCompatActivity(), SensorEventListener{
         startButton.text = "Stop"
         startButton.setBackgroundColor(ContextCompat.getColor(this, R.color.stop_red))
 
+        // Mulai timer
+        startTimer()
+
         // Mulai mendapatkan lokasi pengguna
         getUserLocation()
     }
 
     private fun stopTracking() {
+        val elapsedTime = System.currentTimeMillis() - startTrackingTime
+        if (elapsedTime < 5000) { // Minimal 5 detik
+            Toast.makeText(this, "Tracking must run for at least 5 seconds!", Toast.LENGTH_SHORT).show()
+            return
+        }
+
         isTracking = false
         fusedLocationClient.removeLocationUpdates(locationCallback)
         sensorManager.unregisterListener(this)  // Hentikan pembaruan sensor langkah
+
+        // Hentikan timer
+        stopTimer()
+
+        val duration = formatDuration(elapsedTime)
+
+        // Simpan data aktivitas
+        saveActivity(totalDistance, totalSteps, startTrackingTime, System.currentTimeMillis(), duration)
+
         startButton.text = "Start"
         startButton.setBackgroundColor(ContextCompat.getColor(this, R.color.yellow))
+    }
+
+    private fun startTimer() {
+        timerHandler = Handler(Looper.getMainLooper())
+        timerRunnable = object : Runnable {
+            override fun run() {
+                if (isTracking) {
+                    val elapsedMillis = System.currentTimeMillis() - startTrackingTime
+                    timerTextView.text = formatDuration(elapsedMillis)
+                    timerHandler.postDelayed(this, 1000) // Perbarui setiap detik
+                }
+            }
+        }
+        timerHandler.post(timerRunnable)
+    }
+
+    private fun stopTimer() {
+        if (::timerHandler.isInitialized) {
+            timerHandler.removeCallbacks(timerRunnable)
+        }
+    }
+
+    private fun saveActivity(distance: Double, steps: Int, startTime: Long, endTime: Long, duration: String) {
+        val accountId = getAccountIdFromPreferences() // Ambil ID akun dari SharedPreferences
+
+        // Jika accountId tidak valid, tampilkan pesan kesalahan
+        if (accountId == -1L) {
+            Toast.makeText(this, "User not logged in. Please login first.", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        // Konversi waktu ke format ISO 8601
+        val sdf = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault())
+        val formattedStartTime = sdf.format(Date(startTime))
+        val formattedEndTime = sdf.format(Date(endTime))
+
+        // Kirim data aktivitas menggunakan API
+        mApiService.saveActivity(accountId, distance, steps, formattedStartTime, formattedEndTime, duration).enqueue(object : Callback<BaseResponse<Activity>> {
+            override fun onResponse(
+                call: Call<BaseResponse<Activity>>,
+                response: Response<BaseResponse<Activity>>
+            ) {
+                if (response.isSuccessful) {
+                    val res = response.body()
+                    if (res?.success == true) {
+                        Log.d("ActivitySave", "Activity saved successfully: ${res.payload}")  // Log keberhasilan simpan aktivitas
+                        Log.d("ActivitySave", "StartTime: $formattedStartTime, EndTime: $formattedEndTime")
+                        Toast.makeText(mContext, "Activity saved successfully!", Toast.LENGTH_SHORT).show()
+                    } else {
+                        Log.d("ActivitySave", "Failed to save activity: ${res?.message}")  // Log jika gagal menyimpan aktivitas
+                        Toast.makeText(mContext, "Failed to save activity: ${res?.message}", Toast.LENGTH_SHORT).show()
+                    }
+                } else {
+                    Log.d("ActivitySave", "Error: ${response.code()}")  // Log jika response tidak sukses
+                    Toast.makeText(mContext, "Error: ${response.code()}", Toast.LENGTH_SHORT).show()
+                }
+            }
+
+            override fun onFailure(call: Call<BaseResponse<Activity>>, t: Throwable) {
+                Log.e("ActivitySave", "Network error: ${t.message}", t)  // Log jika terjadi error jaringan
+                Toast.makeText(mContext, "Network error: ${t.message}", Toast.LENGTH_SHORT).show()
+            }
+        })
+    }
+
+    private fun formatDuration(elapsedTime: Long): String {
+        val hours = (elapsedTime / 1000) / 3600
+        val minutes = (elapsedTime / 1000 % 3600) / 60
+        val seconds = (elapsedTime / 1000 % 60)
+
+        return "${hours}h ${minutes}m ${seconds}s"
     }
 
     override fun onSensorChanged(event: SensorEvent?) {

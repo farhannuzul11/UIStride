@@ -26,6 +26,11 @@ public class AccountService {
         return accountRepository.findById(id);
     }
 
+    public Optional<Account> findAccountByEmail(String email) {
+        return accountRepository.findByEmail(email);
+    }
+
+
     public List<Account> getAllAccounts() {
         return (List<Account>) accountRepository.findAll();
     }

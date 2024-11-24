@@ -16,6 +16,7 @@ public class AccountController {
 
     private final AccountService accountService;
 
+
     @Autowired
     public AccountController(AccountService accountService) {
         this.accountService = accountService;
@@ -26,10 +27,11 @@ public class AccountController {
     public ResponseEntity<BaseResponse<Account>> createAccount(
             @RequestParam String username,
             @RequestParam String password,
-            @RequestParam String email) {
-
+            @RequestParam String email
+    ) {
         // Create a new Account object from the request parameters
         Account account = new Account(username, password, email);
+
 
         // Validate the account with regex
         if (!account.validate()) {
@@ -44,6 +46,33 @@ public class AccountController {
         return new ResponseEntity<>(
                 new BaseResponse<>(true, "Account created successfully", savedAccount),
                 HttpStatus.CREATED
+        );
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<BaseResponse<Account>> login(
+            @RequestParam String email,
+            @RequestParam String password) {
+
+        Optional<Account> account = accountService.findAccountByEmail(email);
+
+        if (account.isEmpty()) {
+            return new ResponseEntity<>(
+                    new BaseResponse<>(false, "Account not found", null),
+                    HttpStatus.NOT_FOUND
+            );
+        }
+
+        if (!account.get().getPassword().equals(password)) {
+            return new ResponseEntity<>(
+                    new BaseResponse<>(false, "Incorrect password", null),
+                    HttpStatus.UNAUTHORIZED
+            );
+        }
+
+        return new ResponseEntity<>(
+                new BaseResponse<>(true, "Login successful", account.get()),
+                HttpStatus.OK
         );
     }
 

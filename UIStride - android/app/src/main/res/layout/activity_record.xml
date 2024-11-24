@@ -45,14 +45,14 @@
             android:layout_gravity="center"/>
 
         <TextView
-            android:id="@+id/speedTextView"
+            android:id="@+id/timerTextView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Speed: 0.00 km/h"
+            android:text="00:00:00"
             android:textSize="18sp"
             android:textColor="@android:color/black"
-            android:layout_gravity="center_horizontal"
-            />
+            android:layout_marginTop="16dp"
+            android:layout_gravity="center" />
 
     </LinearLayout>
 

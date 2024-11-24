@@ -1,7 +1,10 @@
 package com.group12.uistride
 
+import android.content.ContentValues.TAG
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -21,9 +24,29 @@ class MainActivity : AppCompatActivity() {
         RecentActivity("October 01", "9.12 km", "1 h 25 m", "10 km/hr")
     )
 
+    private fun getAccountIdFromPreferences(): Long {
+        val sharedPreferences = getSharedPreferences("UserSession", MODE_PRIVATE)
+        return sharedPreferences.getLong("accountId", -1)
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+        val accountId = getAccountIdFromPreferences()
+        Log.d(TAG, "Fetched accountId from preferences: $accountId") // Log nilai ID akun
+
+        if (accountId == -1L) {
+            Log.w(TAG, "No accountId found, redirecting to LoginActivity") // Log jika user belum login
+            Toast.makeText(this, "User not logged in. Please login first.", Toast.LENGTH_SHORT).show()
+            val intent = Intent(this, LoginActivity::class.java)
+            startActivity(intent)
+            finish()
+        } else {
+            Log.d(TAG, "User logged in as accountId: $accountId") // Log jika user login berhasil
+            Toast.makeText(this, "Logged in as User ID: $accountId", Toast.LENGTH_SHORT).show()
+        }
+
 
         // Initialize and set up the RecyclerView
         recyclerView = findViewById(R.id.recentActivityRecyclerView)

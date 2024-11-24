@@ -41,6 +41,14 @@ public class Account {
     public void setId(Long id) {
         this.id = id;
     }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+    public String getPassword() {
+        return password;
+    }
+
     public boolean validate(){
         Pattern patternEmail = Pattern.compile(REGEX_EMAIL);
         Pattern patternPassword = Pattern.compile(REGEX_PASSWORD);
