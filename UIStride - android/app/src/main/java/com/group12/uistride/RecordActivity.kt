@@ -217,9 +217,18 @@ class RecordActivity : AppCompatActivity(), SensorEventListener{
         // Simpan data aktivitas
         saveActivity(totalDistance, totalSteps, startTrackingTime, System.currentTimeMillis(), duration)
 
-        startButton.text = "Start"
-        startButton.setBackgroundColor(ContextCompat.getColor(this, R.color.yellow))
+        // Siapkan hasil untuk dikembalikan ke MainActivity
+        val resultIntent = Intent()
+        resultIntent.putExtra("distance", totalDistance)
+        resultIntent.putExtra("steps", totalSteps)
+        resultIntent.putExtra("startTime", startTrackingTime)
+        resultIntent.putExtra("endTime", System.currentTimeMillis())
+        resultIntent.putExtra("duration", duration)
+        setResult(RESULT_OK, resultIntent)
+
+        finish() // Akhiri Activity
     }
+
 
     private fun startTimer() {
         timerHandler = Handler(Looper.getMainLooper())
@@ -464,5 +473,5 @@ class RecordActivity : AppCompatActivity(), SensorEventListener{
                 }
             }
         }
-        }
+    }
 }

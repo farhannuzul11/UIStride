@@ -9,7 +9,7 @@ android {
 
     defaultConfig {
         applicationId = "com.group12.uistride"
-        minSdk = 24
+        minSdk = 26
         targetSdk = 34
         versionCode = 1
         versionName = "1.0"
@@ -60,6 +60,8 @@ dependencies {
     implementation("org.mapsforge:mapsforge-map-android:0.17.0")
 
     implementation ("com.google.android.material:material:1.10.0")
+
+    implementation ("com.github.PhilJay:MPAndroidChart:v3.1.0")
 
 
 }

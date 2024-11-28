@@ -16,4 +16,13 @@ public class UserPoints {
     private Long accountId;
     private int totalPoints;
 
+
+    public UserPoints() {
+    }
+
+    public UserPoints(Long id, Long accountId, int totalPoints) {
+        this.id = id;
+        this.accountId = accountId;
+        this.totalPoints = totalPoints;
+    }
 }

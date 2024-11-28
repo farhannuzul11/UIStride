@@ -37,7 +37,8 @@ public class Activity {
     }
 
 
-    public Activity(Long accountId, double distance, int steps, LocalDateTime startTime, LocalDateTime endTime, String duration) {
+    public Activity(Long id, Long accountId, double distance, int steps, LocalDateTime startTime, LocalDateTime endTime, String duration) {
+        this.id = id;
         this.accountId = accountId;
         this.distance = distance;
         this.steps = steps;
@@ -45,4 +46,5 @@ public class Activity {
         this.endTime = endTime;
         this.duration = duration;
     }
+
 }

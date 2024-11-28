@@ -1,16 +1,25 @@
 package com.group12.uistride.model;
 
-import java.time.LocalDateTime;
+import java.io.Serializable;
 
-public class Activity {
+public class Activity implements Serializable {
     private Long accountId;
     private double distance;
     private int steps;
     private String startTime;
     private String endTime;
-
     private String duration;
 
+    public Activity(Long accountId, double distance, int steps, String startTime, String endTime, String duration) {
+        this.accountId = accountId;
+        this.distance = distance;
+        this.steps = steps;
+        this.startTime = startTime;
+        this.endTime = endTime;
+        this.duration = duration;
+    }
+
+    // Getters and Setters
     public Long getAccountId() {
         return accountId;
     }
@@ -49,5 +58,12 @@ public class Activity {
 
     public void setEndTime(String endTime) {
         this.endTime = endTime;
+    }
+
+    public void setDuration(String duration) {
+        this.duration = duration;
+    }
+    public String getDuration() {
+        return duration;
     }
 }

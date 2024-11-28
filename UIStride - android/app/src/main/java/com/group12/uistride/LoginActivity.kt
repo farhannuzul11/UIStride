@@ -39,16 +39,17 @@ class LoginActivity : AppCompatActivity() {
         supportActionBar?.hide();
 
         // Cek apakah user sudah login
-       /* val sharedPreferences = getSharedPreferences("UserSession", MODE_PRIVATE)
+        val sharedPreferences = getSharedPreferences("UserSession", MODE_PRIVATE)
         val accountId = sharedPreferences.getLong("accountId", -1)
 
         if (accountId != -1L) {
             Log.d("LoginActivity", "User already logged in with accountId: $accountId")
             // User sudah login, langsung pindah ke MainActivity
             val intent = Intent(this, MainActivity::class.java)
+            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
             startActivity(intent)
             finish()
-        } */
+        }
 
         mContext = this
         mApiService = UtilsApi.getApiService()
@@ -102,14 +103,19 @@ class LoginActivity : AppCompatActivity() {
                     val res = response.body()
                     if (res?.success == true) {
                         loggedAccount = res.payload
-                        saveAccountIdToPreferences(loggedAccount?.id ?: -1) // Simpan ID akun ke SharedPreferences
+
+                        // Simpan accountId dan username ke SharedPreferences
+                        val sharedPreferences = getSharedPreferences("UserSession", Context.MODE_PRIVATE)
+                        val editor = sharedPreferences.edit()
+                        editor.putLong("accountId", loggedAccount?.id ?: -1) // Simpan accountId
+                        editor.putString("username", loggedAccount?.username ?: "User") // Simpan username
+                        editor.apply()
 
                         val intent = Intent(mContext, MainActivity::class.java)
                         startActivity(intent)
                         finish()
                         Toast.makeText(mContext, "Welcome ${loggedAccount?.username}", Toast.LENGTH_SHORT).show()
-                    }
-                    else {
+                    } else {
                         Toast.makeText(mContext, res?.message, Toast.LENGTH_SHORT).show()
                     }
                 }
@@ -120,6 +126,7 @@ class LoginActivity : AppCompatActivity() {
             })
         }
     }
+
 
     private fun saveAccountIdToPreferences(accountId: Long?) {
         if (accountId != null) {
