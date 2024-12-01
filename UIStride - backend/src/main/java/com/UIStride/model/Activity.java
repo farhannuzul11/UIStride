@@ -15,6 +15,10 @@ public class Activity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @ManyToOne
+    @JoinColumn(name = "account_id", insertable = false, updatable = false)
+    private Account account;
+
     @Column(name = "account_id")
     private Long accountId;
 

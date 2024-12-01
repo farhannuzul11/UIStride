@@ -5,6 +5,7 @@ import com.group12.uistride.model.Activity;
 import com.group12.uistride.model.BaseResponse;
 
 import java.util.List;
+import java.util.Map;
 
 import retrofit2.Call;
 import retrofit2.http.GET;
@@ -42,5 +43,16 @@ public interface BaseApiService {
             @Path("account_id") Long accountId
     );
 
+    @GET("statistics/total/{accountId}")
+    Call<BaseResponse<Map<String, Object>>> getStatistics(
+            @Path("accountId") Long accountId,
+            @Query("period") String period
+    );
+
+    @GET("statistics/grouped/{accountId}")
+    Call<BaseResponse<Map<String, Object>>> getGroupedStatistics(
+            @Path("accountId") Long accountId,
+            @Query("period") String period
+    );
 
 }

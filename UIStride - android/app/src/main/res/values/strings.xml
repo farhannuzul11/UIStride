@@ -1,3 +1,11 @@
 <resources>
     <string name="app_name">UIStride</string>
+
+    <string-array name="statistics_periods">
+        <item>Daily</item>
+        <item>Weekly</item>
+        <item>Monthly</item>
+        <item>Yearly</item>
+        <item>All Time</item>
+    </string-array>
 </resources>

@@ -1,7 +1,7 @@
 package com.UIStride;
 
 import com.UIStride.model.UserPoints;
-import com.UIStride.service.UserPointsService;
+import com.UIStride.service.PointsService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -16,13 +16,13 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @AutoConfigureMockMvc
-public class UserPointsTest {
+public class PointsTest {
 
     @Autowired
     private MockMvc mockMvc;
 
     @MockBean
-    private UserPointsService userPointsService;
+    private PointsService userPointsService;
 
     @Test
     void testGetUserPointsSuccess() throws Exception {

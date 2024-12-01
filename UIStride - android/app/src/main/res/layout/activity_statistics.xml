@@ -1,0 +1,29 @@
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <!-- Dropdown for selecting the period -->
+    <Spinner
+        android:id="@+id/spinnerPeriod"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:entries="@array/statistics_periods" />
+
+    <!-- BarChart for Distance -->
+    <com.github.mikephil.charting.charts.BarChart
+        android:id="@+id/barChartDistance"
+        android:layout_width="match_parent"
+        android:layout_height="300dp"
+        android:layout_marginTop="16dp" />
+
+    <!-- BarChart for Steps -->
+    <com.github.mikephil.charting.charts.BarChart
+        android:id="@+id/barChartSteps"
+        android:layout_width="match_parent"
+        android:layout_height="300dp"
+        android:layout_marginTop="16dp" />
+
+</LinearLayout>

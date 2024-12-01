@@ -25,7 +25,45 @@
             android:text="Hello, User"
             android:textSize="18sp" />
 
+        <TextView
+            android:id="@+id/totalDistanceTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Total Distance: 0 km"
+            android:textSize="14sp"
+            android:layout_marginTop="4dp" />
+
+        <TextView
+            android:id="@+id/totalStepsTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Total Steps: 0"
+            android:textSize="14sp"
+            android:layout_marginTop="4dp" />
+
+        <TextView
+            android:id="@+id/totalPointsTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Total Points: 0"
+            android:textSize="14sp"
+            android:layout_marginTop="4dp" />
+
+        <Spinner
+            android:id="@+id/statsPeriodSpinner"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            app:layout_constraintTop_toBottomOf="@id/totalPointsTextView"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:spinnerMode="dropdown"
+            android:entries="@array/statistics_periods" />
+
     </LinearLayout>
+
+
+
 
     <!-- Recent Activity List -->
     <androidx.recyclerview.widget.RecyclerView

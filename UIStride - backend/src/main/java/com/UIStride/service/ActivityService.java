@@ -2,11 +2,14 @@ package com.UIStride.service;
 
 import com.UIStride.model.Activity;
 import com.UIStride.repository.ActivityRepository;
+import com.UIStride.repository.PointsRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -15,32 +18,52 @@ public class ActivityService {
     @Autowired
     private ActivityRepository activityRepository;
 
+    @Autowired
+    private PointsRepository pointsRepository;
+
     public List<Activity> getActivitiesByAccountId(Long accountId) {
         return activityRepository.findByAccountId(accountId);
     }
-    public Activity getActivity(Long accountId) {
-        List<Activity> activities = activityRepository.findByAccountId(accountId);
 
-        if (activities.isEmpty()) {
-            Activity newRecord = new Activity();
-            newRecord.setAccountId(accountId);
-            return activityRepository.save(newRecord);
-        }
-
-        return activities.get(0);
+    // Menambahkan method untuk findByAccountIdAndStartTimeBetween
+    public List<Activity> getActivitiesByAccountIdAndPeriod(Long accountId, LocalDateTime startTime, LocalDateTime endTime) {
+        return activityRepository.findByAccountIdAndStartTimeBetween(accountId, startTime, endTime);
     }
 
-    public Activity updateActivity(Long accountId, Double distance, Integer steps) {
-        Activity activity = getActivity(accountId);
-
-        activity.setDistance(distance);
-        activity.setSteps(steps);
-        activity.setEndTime(LocalDateTime.now());
-
-        return activityRepository.save(activity);
+    // Menambahkan method untuk getTotalStepsByAccountId
+    public int getTotalStepsByAccountId(Long accountId) {
+        return activityRepository.getTotalStepsByAccountId(accountId);
     }
 
+    // Menambahkan method untuk getTotalDistanceByAccountId
+    public double getTotalDistanceByAccountId(Long accountId) {
+        return activityRepository.getTotalDistanceByAccountId(accountId);
+    }
 
+    // Statistik yang sudah ada berdasarkan periode (daily, weekly, monthly, alltime)
+    public Map<String, Object> getUserStatistics(Long accountId, LocalDateTime startDate, LocalDateTime endDate) {
+        double totalDistance = getTotalDistanceByAccountIdAndPeriod(accountId, startDate, endDate);
+        int totalSteps = getTotalStepsByAccountIdAndPeriod(accountId, startDate, endDate);
+        int totalPoints = pointsRepository.getTotalPointsByAccountIdAndPeriod(accountId, startDate, endDate);
+
+        Map<String, Object> statistics = new HashMap<>();
+        statistics.put("totalDistance", totalDistance);
+        statistics.put("totalSteps", totalSteps);
+        statistics.put("totalPoints", totalPoints);
+        return statistics;
+    }
+
+    // Mendapatkan total jarak berdasarkan AccountId dalam periode waktu tertentu
+    public double getTotalDistanceByAccountIdAndPeriod(Long accountId, LocalDateTime startDate, LocalDateTime endDate) {
+        return activityRepository.getTotalDistanceByAccountIdAndPeriod(accountId, startDate, endDate);
+    }
+
+    // Mendapatkan total langkah berdasarkan AccountId dalam periode waktu tertentu
+    public int getTotalStepsByAccountIdAndPeriod(Long accountId, LocalDateTime startDate, LocalDateTime endDate) {
+        return activityRepository.getTotalStepsByAccountIdAndPeriod(accountId, startDate, endDate);
+    }
+
+    // Menambahkan aktivitas baru
     public Activity addActivity(Long accountId, double distance, int steps, LocalDateTime start, LocalDateTime end, String duration) {
         System.out.println("Service - AccountId: " + accountId);
         System.out.println("Service - Distance: " + distance);
@@ -67,5 +90,4 @@ public class ActivityService {
             return null;
         }
     }
-
 }

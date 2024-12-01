@@ -35,7 +35,7 @@ class ActivityAdapter(private val activities: List<Activity>) :
         fun bind(activity: Activity) {
             try {
                 val inputFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault())
-                val outputFormatter = DateTimeFormatter.ofPattern("d MMM yyyy", Locale.getDefault())
+                val outputFormatter = DateTimeFormatter.ofPattern("d MMM yyyy, h:mm a", Locale.getDefault())
 
                 val startTime = LocalDateTime.parse(activity.startTime, inputFormatter)
                 val endTime = LocalDateTime.parse(activity.endTime, inputFormatter)
@@ -51,6 +51,5 @@ class ActivityAdapter(private val activities: List<Activity>) :
             distanceTextView.text = "Distance: %.2f km".format(activity.distance)
             stepsTextView.text = "Steps: ${activity.steps}"
         }
-
     }
 }
