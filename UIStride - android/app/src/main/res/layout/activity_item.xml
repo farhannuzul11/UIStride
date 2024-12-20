@@ -6,7 +6,9 @@
     android:layout_height="wrap_content"
     android:layout_margin="8dp"
     android:padding="16dp"
-    app:cardElevation="4dp">
+    app:cardElevation="4dp"
+    app:cardBackgroundColor="@color/yellow_accent2"
+    app:cardCornerRadius="24dp">
 
     <LinearLayout
         android:orientation="vertical"
@@ -19,7 +21,11 @@
             android:layout_height="wrap_content"
             android:text="Start Time"
             android:textSize="16sp"
-            android:layout_marginBottom="4dp"/>
+            android:textColor="@android:color/black"
+            android:layout_marginBottom="4dp"
+            android:layout_marginTop="12dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="16dp"/>
 
         <TextView
             android:id="@+id/endTimeTextView"
@@ -27,7 +33,11 @@
             android:layout_height="wrap_content"
             android:text="End Time"
             android:textSize="16sp"
-            android:layout_marginBottom="4dp"/>
+            android:textColor="@android:color/black"
+            android:layout_marginBottom="4dp"
+            android:layout_marginTop="4dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="16dp"/>
 
         <TextView
             android:id="@+id/durationTextView"
@@ -35,7 +45,11 @@
             android:layout_height="wrap_content"
             android:text="Duration"
             android:textSize="16sp"
-            android:layout_marginBottom="4dp"/>
+            android:textColor="@android:color/black"
+            android:layout_marginBottom="4dp"
+            android:layout_marginTop="4dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="16dp"/>
 
         <TextView
             android:id="@+id/distanceTextView"
@@ -43,13 +57,22 @@
             android:layout_height="wrap_content"
             android:text="Distance"
             android:textSize="16sp"
-            android:layout_marginBottom="4dp"/>
+            android:textColor="@android:color/black"
+            android:layout_marginBottom="4dp"
+            android:layout_marginTop="4dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="16dp"/>
 
         <TextView
             android:id="@+id/stepsTextView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Steps"
-            android:textSize="16sp"/>
+            android:textSize="16sp"
+            android:textColor="@android:color/black"
+            android:layout_marginBottom="12dp"
+            android:layout_marginTop="4dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="16dp"/>
     </LinearLayout>
 </androidx.cardview.widget.CardView>

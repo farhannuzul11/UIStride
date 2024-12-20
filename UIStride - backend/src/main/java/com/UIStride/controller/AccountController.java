@@ -106,7 +106,7 @@ public class AccountController {
     public ResponseEntity<BaseResponse<Account>> updateAccount(
             @PathVariable Long id, @RequestBody Account updatedAccount) {
 
-        // Validasi akun dengan regex
+        // Validate the account with regex
         if (!updatedAccount.validate()) {
             return new ResponseEntity<>(
                     new BaseResponse<>(false, "Invalid email or password format", null),

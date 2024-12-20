@@ -80,12 +80,12 @@ class RecordActivity : AppCompatActivity(), SensorEventListener{
     }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_record)
+        supportActionBar?.hide();
 
         // Inisialisasi osmdroid
         val sharedPreferences = androidx.preference.PreferenceManager.getDefaultSharedPreferences(applicationContext)
         Configuration.getInstance().load(applicationContext, sharedPreferences)
-
-        setContentView(R.layout.activity_record)
 
         mApiService = UtilsApi.getApiService()
         mContext = this
@@ -101,7 +101,7 @@ class RecordActivity : AppCompatActivity(), SensorEventListener{
             finish()
         } else {
             Log.d(ContentValues.TAG, "User logged in as accountId: $accountId") // Log jika user login berhasil
-            Toast.makeText(this, "Logged in as User ID: $accountId", Toast.LENGTH_SHORT).show()
+            //Toast.makeText(this, "Logged in as User ID: $accountId", Toast.LENGTH_SHORT).show()
         }
 
         // Setup mapView
@@ -275,7 +275,10 @@ class RecordActivity : AppCompatActivity(), SensorEventListener{
                     if (res?.success == true) {
                         Log.d("ActivitySave", "Activity saved successfully: ${res.payload}")  // Log keberhasilan simpan aktivitas
                         Log.d("ActivitySave", "StartTime: $formattedStartTime, EndTime: $formattedEndTime")
+
+                        calculatePoints(accountId)
                         Toast.makeText(mContext, "Activity saved successfully!", Toast.LENGTH_SHORT).show()
+
                     } else {
                         Log.d("ActivitySave", "Failed to save activity: ${res?.message}")  // Log jika gagal menyimpan aktivitas
                         Toast.makeText(mContext, "Failed to save activity: ${res?.message}", Toast.LENGTH_SHORT).show()
@@ -292,6 +295,28 @@ class RecordActivity : AppCompatActivity(), SensorEventListener{
             }
         })
     }
+
+    private fun calculatePoints(accountId: Long) {
+        Log.d("CalculatePoints", "Initiating point calculation for Account ID: $accountId")
+
+        mApiService.processActivityPoints(accountId).enqueue(object : Callback<BaseResponse<Void>> {
+            override fun onResponse(call: Call<BaseResponse<Void>>, response: Response<BaseResponse<Void>>) {
+                if (response.isSuccessful) {
+                    Log.d("CalculatePoints", "Response: ${response.code()} - Points calculated successfully")
+                    Toast.makeText(this@RecordActivity, "Points calculated successfully!", Toast.LENGTH_SHORT).show()
+                } else {
+                    Log.e("CalculatePoints", "Response Error: ${response.code()} - ${response.errorBody()?.string()}")
+                    Toast.makeText(this@RecordActivity, "Failed to calculate points. Code: ${response.code()}", Toast.LENGTH_SHORT).show()
+                }
+            }
+
+            override fun onFailure(call: Call<BaseResponse<Void>>, t: Throwable) {
+                Log.e("CalculatePoints", "Network Error: ${t.message}", t)
+                Toast.makeText(this@RecordActivity, "Error: ${t.message}", Toast.LENGTH_SHORT).show()
+            }
+        })
+    }
+
 
     private fun formatDuration(elapsedTime: Long): String {
         val hours = (elapsedTime / 1000) / 3600

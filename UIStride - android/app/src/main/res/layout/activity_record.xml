@@ -8,63 +8,97 @@
     android:background="@android:color/white"
     tools:context=".RecordActivity">
 
+    <!-- MapView -->
     <org.osmdroid.views.MapView
         android:id="@+id/mapView"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toTopOf="@+id/statsLayout"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
-    <LinearLayout
+    <!-- Stats Layout - Using CardView for better appearance -->
+    <androidx.cardview.widget.CardView
         android:id="@+id/statsLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:background="@android:color/white"
-        android:padding="16dp"
-        app:layout_constraintBottom_toTopOf="@+id/startButton">
+        app:cardCornerRadius="16dp"
+        app:cardElevation="4dp"
+        android:layout_margin="16dp"
+        app:layout_constraintBottom_toTopOf="@+id/startButton"
+        android:background="@android:color/white">
 
-        <TextView
-            android:id="@+id/distanceTextView"
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Distance: 0 m"
-            android:textSize="18sp"
-            android:textColor="@android:color/black"
-            android:layout_gravity="center" />
+            android:orientation="horizontal"
+            android:backgroundTint="@color/white"
+            android:padding="16dp"
+            android:gravity="center_vertical">
 
-        <TextView
-            android:id="@+id/stepsTextView"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Steps: 0"
-            android:textSize="18sp"
-            android:textColor="@android:color/black"
-            android:layout_gravity="center"/>
+            <!-- Left side: Distance and Steps -->
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:gravity="start">
 
-        <TextView
-            android:id="@+id/timerTextView"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="00:00:00"
-            android:textSize="18sp"
-            android:textColor="@android:color/black"
-            android:layout_marginTop="16dp"
-            android:layout_gravity="center" />
+                <TextView
+                    android:id="@+id/distanceTextView"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Distance: 0 m"
+                    android:textSize="20sp"
+                    android:textColor="@android:color/black"
+                    android:layout_marginBottom="8dp"/>
 
-    </LinearLayout>
+                <TextView
+                    android:id="@+id/stepsTextView"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Steps: 0"
+                    android:textSize="20sp"
+                    android:textColor="@android:color/black"
+                    android:layout_marginBottom="8dp"/>
 
+            </LinearLayout>
+
+            <!-- Right side: Timer -->
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:gravity="end">
+
+                <TextView
+                    android:id="@+id/timerTextView"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="00:00:00"
+                    android:textSize="24sp"
+                    android:textColor="@android:color/black"
+                    android:textStyle="bold"
+                    android:layout_marginTop="8dp"
+                    android:layout_marginBottom="8dp"/>
+
+            </LinearLayout>
+
+        </LinearLayout>
+    </androidx.cardview.widget.CardView>
+
+    <!-- Start Button -->
     <Button
         android:id="@+id/startButton"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_margin="16dp"
-        android:backgroundTint="@color/yellow"
+        android:backgroundTint="@color/yellow_dark"
         android:text="Start"
-        android:padding="12dp"
         android:textColor="@android:color/white"
+        android:padding="16dp"
+        app:cornerRadius="50dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="1.0"

@@ -3,10 +3,14 @@ package com.UIStride.service;
 import com.UIStride.model.Activity;
 import com.UIStride.repository.ActivityRepository;
 import com.UIStride.repository.PointsRepository;
+import com.UIStride.repository.UserPointsRepository;
+import com.UIStride.repository.UserRewardRepository;
+import org.apache.catalina.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.time.Month;
 import java.time.temporal.IsoFields;
 import java.util.*;
 
@@ -19,18 +23,30 @@ public class StatisticsService {
     @Autowired
     private PointsRepository pointsRepository;
 
+    @Autowired
+    private UserPointsRepository userPointsRepository;
+
+
+
     // Statistik berdasarkan periode
     public Map<String, Object> getUserStatistics(Long accountId, LocalDateTime startDate, LocalDateTime endDate) {
         double totalDistance = activityRepository.getTotalDistanceByAccountIdAndPeriod(accountId, startDate, endDate);
         int totalSteps = activityRepository.getTotalStepsByAccountIdAndPeriod(accountId, startDate, endDate);
-        int totalPoints = pointsRepository.getTotalPointsByAccountIdAndPeriod(accountId, startDate, endDate);
 
+        // Total points dari user_points
+        Integer currentTotalPoints = userPointsRepository.findTotalPointsByAccountId(accountId);
+        if (currentTotalPoints == null) {
+            currentTotalPoints = 0;
+        }
+
+        // Atur statistik
         Map<String, Object> statistics = new HashMap<>();
         statistics.put("totalDistance", totalDistance);
         statistics.put("totalSteps", totalSteps);
-        statistics.put("totalPoints", totalPoints);
+        statistics.put("totalPoints", currentTotalPoints);
         return statistics;
     }
+
 
     // Statistik yang dikelompokkan berdasarkan hari, minggu, bulan, tahun, atau alltime
     public Map<String, Object> getGroupedStatistics(Long accountId, LocalDateTime startDate, LocalDateTime endDate, String period) {
@@ -140,6 +156,7 @@ public class StatisticsService {
         Map<String, Double> distanceByMonth = new HashMap<>();
         Map<String, Integer> pointsByMonth = new HashMap<>();
 
+        // Proses data aktivitas
         for (Activity activity : activities) {
             String month = activity.getStartTime().getMonth().toString(); // January, February, etc.
             stepsByMonth.put(month, stepsByMonth.getOrDefault(month, 0) + activity.getSteps());
@@ -147,10 +164,38 @@ public class StatisticsService {
             pointsByMonth.put(month, pointsByMonth.getOrDefault(month, 0) + calculatePoints(activity));
         }
 
-        Map<String, Object> monthlyStats = new HashMap<>();
-        monthlyStats.put("stepsByMonth", stepsByMonth);
-        monthlyStats.put("distanceByMonth", distanceByMonth);
-        monthlyStats.put("pointsByMonth", pointsByMonth);
+        // Hapus bulan tanpa data
+        stepsByMonth.entrySet().removeIf(entry -> entry.getValue() == 0);
+        distanceByMonth.entrySet().removeIf(entry -> entry.getValue() == 0.0);
+        pointsByMonth.entrySet().removeIf(entry -> entry.getValue() == 0);
+
+        // Urutkan bulan berdasarkan urutan kalender
+        List<String> monthsOrder = Arrays.asList(
+                "JANUARY", "FEBRUARY", "MARCH", "APRIL", "MAY", "JUNE",
+                "JULY", "AUGUST", "SEPTEMBER", "OCTOBER", "NOVEMBER", "DECEMBER"
+        );
+
+        Map<String, Integer> sortedStepsByMonth = new LinkedHashMap<>();
+        Map<String, Double> sortedDistanceByMonth = new LinkedHashMap<>();
+        Map<String, Integer> sortedPointsByMonth = new LinkedHashMap<>();
+
+        for (String month : monthsOrder) {
+            if (stepsByMonth.containsKey(month)) {
+                sortedStepsByMonth.put(month, stepsByMonth.get(month));
+            }
+            if (distanceByMonth.containsKey(month)) {
+                sortedDistanceByMonth.put(month, distanceByMonth.get(month));
+            }
+            if (pointsByMonth.containsKey(month)) {
+                sortedPointsByMonth.put(month, pointsByMonth.get(month));
+            }
+        }
+
+        // Gabungkan hasil ke dalam Map final
+        Map<String, Object> monthlyStats = new LinkedHashMap<>();
+        monthlyStats.put("stepsByMonth", sortedStepsByMonth);
+        monthlyStats.put("distanceByMonth", sortedDistanceByMonth);
+        monthlyStats.put("pointsByMonth", sortedPointsByMonth);
 
         return monthlyStats;
     }

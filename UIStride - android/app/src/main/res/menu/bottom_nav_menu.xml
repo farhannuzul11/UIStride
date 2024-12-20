@@ -1,11 +1,13 @@
-<menu xmlns:android="http://schemas.android.com/apk/res/android">
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    app:backgroundTint="@null">
     <item
         android:id="@+id/nav_home"
-        android:icon="@drawable/baseline_home_24"
+        android:icon="@drawable/home"
         android:title="Home" />
     <item
         android:id="@+id/nav_record"
-        android:icon="@drawable/record_icon"
+        android:icon="@drawable/record"
         android:title="Record" />
     <item
         android:id="@+id/nav_profile"

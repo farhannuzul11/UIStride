@@ -32,6 +32,7 @@ class RegisterActivity : AppCompatActivity() {
     private lateinit var password: EditText
     private lateinit var emailInputLayout: TextInputLayout
     private lateinit var passwordInputLayout: TextInputLayout
+    private lateinit var loginNow: TextView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -46,8 +47,10 @@ class RegisterActivity : AppCompatActivity() {
         password = findViewById(R.id.register_password)
         emailInputLayout = findViewById(R.id.emailInputLayout)
         passwordInputLayout = findViewById(R.id.passwordInputLayout)
+        loginNow = findViewById(R.id.login_now)
 
         registerButton.setOnClickListener { handleRegister() }
+        loginNow.setOnClickListener { moveActivity(mContext, LoginActivity::class.java) }
 
         email.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
@@ -64,6 +67,8 @@ class RegisterActivity : AppCompatActivity() {
             }
             override fun afterTextChanged(s: Editable?) {}
         })
+
+
 
     }
 

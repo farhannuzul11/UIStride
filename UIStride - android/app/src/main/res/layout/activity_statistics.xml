@@ -1,29 +1,68 @@
-<LinearLayout
+<androidx.core.widget.NestedScrollView
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:padding="16dp">
+    android:background="@color/white">
 
-    <!-- Dropdown for selecting the period -->
-    <Spinner
-        android:id="@+id/spinnerPeriod"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:entries="@array/statistics_periods" />
+        android:orientation="vertical"
+        android:padding="16dp">
 
-    <!-- BarChart for Distance -->
-    <com.github.mikephil.charting.charts.BarChart
-        android:id="@+id/barChartDistance"
-        android:layout_width="match_parent"
-        android:layout_height="300dp"
-        android:layout_marginTop="16dp" />
+        <!-- Dropdown for selecting the period -->
+        <Spinner
+            android:id="@+id/spinnerPeriod"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:layout_marginBottom="16dp"
+            android:background="@drawable/spinner_background"
+            android:backgroundTint="@color/amber_accent"
+            android:entries="@array/statistics_periods"
+            android:padding="12dp" />
 
-    <!-- BarChart for Steps -->
-    <com.github.mikephil.charting.charts.BarChart
-        android:id="@+id/barChartSteps"
-        android:layout_width="match_parent"
-        android:layout_height="300dp"
-        android:layout_marginTop="16dp" />
+        <!-- Title for Distance Chart -->
+        <TextView
+            android:id="@+id/distanceTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Distance"
+            android:textSize="18sp"
+            android:textColor="@color/black"
+            android:textStyle="bold"
+            android:layout_marginTop="16dp" />
 
-</LinearLayout>
+        <!-- BarChart for Distance -->
+        <com.github.mikephil.charting.charts.BarChart
+            android:id="@+id/barChartDistance"
+            android:layout_width="match_parent"
+            android:layout_height="300dp"
+            android:layout_marginTop="8dp"
+            android:background="@drawable/rounded_edge"
+            android:backgroundTint="@color/light_gray"
+            android:padding="8dp" />
+
+        <!-- Title for Steps Chart -->
+        <TextView
+            android:id="@+id/stepsTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Steps"
+            android:textSize="18sp"
+            android:textColor="@color/black"
+            android:textStyle="bold"
+            android:layout_marginTop="32dp" />
+
+        <!-- BarChart for Steps -->
+        <com.github.mikephil.charting.charts.BarChart
+            android:id="@+id/barChartSteps"
+            android:layout_width="match_parent"
+            android:layout_height="300dp"
+            android:layout_marginTop="8dp"
+            android:background="@drawable/rounded_edge"
+            android:backgroundTint="@color/light_gray"
+            android:padding="8dp" />
+
+    </LinearLayout>
+</androidx.core.widget.NestedScrollView>

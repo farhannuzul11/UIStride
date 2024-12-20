@@ -46,8 +46,6 @@ public class PointsController {
                     .body(new BaseResponse<>(false, "Failed to process points: " + e.getMessage(), null));
         }
     }
-
-
 }
 
 

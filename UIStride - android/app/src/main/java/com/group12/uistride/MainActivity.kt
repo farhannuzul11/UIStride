@@ -3,7 +3,6 @@ package com.group12.uistride
 import android.content.ContentValues.TAG
 import android.content.Context
 import android.content.Intent
-import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.view.View
@@ -19,12 +18,10 @@ import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.group12.uistride.model.Activity
 import com.group12.uistride.model.BaseResponse
 import com.group12.uistride.request.BaseApiService
-import com.group12.uistride.request.RetrofitClient
 import com.group12.uistride.request.UtilsApi
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
-import java.text.DateFormat
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -40,6 +37,8 @@ class MainActivity : AppCompatActivity() {
     private lateinit var totalPointsTextView: TextView
     private lateinit var statsPeriodSpinner: Spinner
     private lateinit var mApiService: BaseApiService
+    private var accountId: Long = -1
+    private var period: String = "alltime"
 
     private lateinit var bottomNavigationView: BottomNavigationView
 
@@ -47,6 +46,8 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+        supportActionBar?.hide()
+
 
         val accountId = getAccountIdFromPreferences()
         Log.d(TAG, "Fetched accountId from preferences: $accountId")
@@ -61,11 +62,10 @@ class MainActivity : AppCompatActivity() {
             return
         } else {
             Log.d(TAG, "User logged in as accountId: $accountId")
-            Toast.makeText(this, "Logged in as User ID: $accountId", Toast.LENGTH_SHORT).show()
+            //Toast.makeText(this, "Logged in as User ID: $accountId", Toast.LENGTH_SHORT).show()
         }
 
         mApiService = UtilsApi.getApiService()
-
 
         val sharedPreferences = getSharedPreferences("UserSession", Context.MODE_PRIVATE)
         val username = sharedPreferences.getString("username", "User")
@@ -97,8 +97,15 @@ class MainActivity : AppCompatActivity() {
         }
 
         // Set default statistik
-        fetchStatistics(accountId, "alltime")
+        updateUserTotalPoints(accountId)
 
+        val period = "daily"
+        fetchStatistics(accountId, period)
+
+        val newPoints = intent.getIntExtra("newPoints", 0)
+        if (newPoints > 0) {
+            Toast.makeText(this, "You earned $newPoints points!", Toast.LENGTH_SHORT).show()
+        }
 
         recyclerView = findViewById(R.id.activityRecyclerView)
         activityAdapter = ActivityAdapter(activityList)
@@ -124,7 +131,10 @@ class MainActivity : AppCompatActivity() {
                 }
                 R.id.nav_profile -> {
                     // Handle Profile action
-                    val intent = Intent(this, StatisticsActivity::class.java)
+                    //val intent = Intent(this, StatisticsActivity::class.java)
+                    //intent.putExtra("accountId", accountId)
+
+                    val intent = Intent(this, ProfileActivity::class.java)
                     intent.putExtra("accountId", accountId)
                     startActivity(intent)
                     true
@@ -133,6 +143,21 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
+    }
+
+    override fun onResume() {
+        super.onResume()
+
+        val accountId = getAccountIdFromPreferences()
+        if (accountId != -1L) {
+            fetchStatistics(accountId, "daily")
+        } else {
+            Log.w("MainActivity", "No accountId found in onResume, redirecting to LoginActivity")
+            val intent = Intent(this, LoginActivity::class.java)
+            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+            startActivity(intent)
+            finish()
+        }
     }
 
     private val recordActivityLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
@@ -157,7 +182,6 @@ class MainActivity : AppCompatActivity() {
                     return@registerForActivityResult
                 }
 
-                // Buat objek Activity dari kelas Java
                 val newActivity = Activity(
                     accountId,             // accountId dari preferensi
                     distance,              // Jarak
@@ -175,12 +199,49 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-
-
     private fun getAccountIdFromPreferences(): Long {
         val sharedPreferences = getSharedPreferences("UserSession", MODE_PRIVATE)
         return sharedPreferences.getLong("accountId", -1)
     }
+    private fun updateUserTotalPoints(accountId: Long) {
+        val sharedPreferences = getSharedPreferences("UserSession", Context.MODE_PRIVATE)
+        val lastUpdated = sharedPreferences.getLong("lastUpdatedPoints", 0)
+
+        val currentTime = System.currentTimeMillis()
+        val oneDayInMillis = 24 * 60 * 60 * 1000 // 24 jam
+
+        if (currentTime - lastUpdated < oneDayInMillis) {
+            //Toast.makeText(this, "Points already updated today!", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        mApiService.updateUserTotalPoints(accountId)
+            .enqueue(object : Callback<BaseResponse<Void>> {
+                override fun onResponse(
+                    call: Call<BaseResponse<Void>>,
+                    response: Response<BaseResponse<Void>>
+                ) {
+                    if (response.isSuccessful) {
+                        Toast.makeText(this@MainActivity, "Total points updated successfully!", Toast.LENGTH_SHORT).show()
+
+                        // Simpan waktu terakhir diperbarui
+                        val editor = sharedPreferences.edit()
+                        editor.putLong("lastUpdatedPoints", currentTime)
+                        editor.apply()
+
+                        // Ambil statistik setelah poin diperbarui
+                        fetchStatistics(accountId, "daily")
+                    } else {
+                        Toast.makeText(this@MainActivity, "Failed to update total points.", Toast.LENGTH_SHORT).show()
+                    }
+                }
+
+                override fun onFailure(call: Call<BaseResponse<Void>>, t: Throwable) {
+                    Toast.makeText(this@MainActivity, "Error: ${t.message}", Toast.LENGTH_SHORT).show()
+                }
+            })
+    }
+
 
     private fun fetchStatistics(accountId: Long, period: String) {
         mApiService.getStatistics(accountId, period).enqueue(object : Callback<BaseResponse<Map<String, Any>>> {
@@ -191,12 +252,10 @@ class MainActivity : AppCompatActivity() {
                 if (response.isSuccessful && response.body() != null && response.body()!!.success) {
                     val statistics = response.body()!!.payload
 
-                    // Ambil data dari payload dengan format yang sesuai
                     val totalDistance = (statistics["totalDistance"] as? Double) ?: 0.0
                     val totalSteps = (statistics["totalSteps"] as? Double)?.toInt() ?: 0
                     val totalPoints = (statistics["totalPoints"] as? Double)?.toInt() ?: 0
 
-                    // Format totalDistance dengan 2 angka desimal
                     val formattedDistance = String.format(Locale.getDefault(), "%.2f", totalDistance)
 
                     // Update TextViews
@@ -213,6 +272,7 @@ class MainActivity : AppCompatActivity() {
             }
         })
     }
+
 
 
     private fun fetchActivities(accountId: Long) {

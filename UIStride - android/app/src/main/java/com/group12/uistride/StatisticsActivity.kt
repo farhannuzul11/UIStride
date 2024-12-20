@@ -34,6 +34,7 @@ class StatisticsActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_statistics)
+        supportActionBar?.hide();
 
         barChartDistance = findViewById(R.id.barChartDistance)
         barChartSteps = findViewById(R.id.barChartSteps)
@@ -55,7 +56,7 @@ class StatisticsActivity : AppCompatActivity() {
                     1 -> "weekly"
                     2 -> "monthly"
                     3 -> "yearly"
-                    else -> "alltime"
+                    else -> "daily"
                 }
                 fetchStatistics(accountId, selectedPeriod)
             }
@@ -73,8 +74,8 @@ class StatisticsActivity : AppCompatActivity() {
                 if (response.isSuccessful && response.body() != null && response.body()!!.success) {
                     val statistics = response.body()!!.payload
                     // Handle the statistics based on the selected period
-                    val distanceStats = statistics["distanceByDay"] ?: statistics["distanceByWeek"] ?: statistics["distanceByMonth"] ?: statistics["distanceByYear"] ?: statistics["totalDistance"]
-                    val stepsStats = statistics["stepsByDay"] ?: statistics["stepsByWeek"] ?: statistics["stepsByMonth"] ?: statistics["stepsByYear"] ?: statistics["totalSteps"]
+                    val distanceStats = statistics["distanceByDay"] ?: statistics["distanceByWeek"] ?: statistics["distanceByMonth"] ?: statistics["distanceByYear"]
+                    val stepsStats = statistics["stepsByDay"] ?: statistics["stepsByWeek"] ?: statistics["stepsByMonth"] ?: statistics["stepsByYear"]
 
                     Log.d("Statistics", "distanceStats: $distanceStats")
                     Log.d("Statistics", "stepsStats: $stepsStats")
@@ -107,7 +108,7 @@ class StatisticsActivity : AppCompatActivity() {
 
         // Mengatur warna berdasarkan label atau chart
         val barDataSet = BarDataSet(entries, label)
-        barDataSet.colors = listOf(getYellowColorForChart(label))  // Mengatur warna berdasarkan label
+        barDataSet.colors = listOf(getColorForChart(label))  // Mengatur warna berdasarkan label
 
         val barData = BarData(barDataSet)
         barData.setValueTextSize(12f)
@@ -135,10 +136,10 @@ class StatisticsActivity : AppCompatActivity() {
     }
 
     // Fungsi untuk menentukan warna kuning untuk chart
-    private fun getYellowColorForChart(label: String): Int {
+    private fun getColorForChart(label: String): Int {
         return when (label) {
-            "Total Distance" -> Color.parseColor("#FFD700") // Emas untuk jarak
-            "Total Steps" -> Color.parseColor("#FFEB3B") // Kuning cerah untuk langkah
+            "Total Distance" -> Color.parseColor("#e9724d")
+            "Total Steps" -> Color.parseColor("#79ccb3")
             else -> Color.YELLOW  // Default ke warna kuning
         }
     }

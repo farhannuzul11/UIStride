@@ -35,6 +35,7 @@ class LoginActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        setTheme(R.style.Theme_UIStride)
         setContentView(R.layout.activity_login)
         supportActionBar?.hide();
 
@@ -104,11 +105,12 @@ class LoginActivity : AppCompatActivity() {
                     if (res?.success == true) {
                         loggedAccount = res.payload
 
-                        // Simpan accountId dan username ke SharedPreferences
+                        // Simpan accountId, username, dan email ke SharedPreferences
                         val sharedPreferences = getSharedPreferences("UserSession", Context.MODE_PRIVATE)
                         val editor = sharedPreferences.edit()
                         editor.putLong("accountId", loggedAccount?.id ?: -1) // Simpan accountId
                         editor.putString("username", loggedAccount?.username ?: "User") // Simpan username
+                        editor.putString("email", emailS) // Simpan email
                         editor.apply()
 
                         val intent = Intent(mContext, MainActivity::class.java)
@@ -126,7 +128,6 @@ class LoginActivity : AppCompatActivity() {
             })
         }
     }
-
 
     private fun saveAccountIdToPreferences(accountId: Long?) {
         if (accountId != null) {
